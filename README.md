@@ -1,0 +1,2 @@
+# Flashsalejava
+Java Term Project
