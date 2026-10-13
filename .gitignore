@@ -29,6 +29,8 @@ target/
 build/
 
 # IDE specific files
+.vscode/
+**/.vscode/
 # Eclipse
 .classpath
 .project
@@ -54,3 +56,9 @@ application-*.yml
 # OS files
 .DS_Store
 Thumbs.db
+
+# Ignore Maven build output in all directories
+**/target/
+
+# Environment secrets
+.env
