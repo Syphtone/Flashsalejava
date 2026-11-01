@@ -48,10 +48,6 @@ function App() {
   const [form, setForm] = useState({ name: "", price: "", stock: "", startTime: "", endTime: "" });
   const [formError, setFormError] = useState("");
   const [notice, setNotice] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState("");
-  const [userCount, setUserCount] = useState("100");
-  const [simulationResult, setSimulationResult] = useState(null);
-  const [simulationError, setSimulationError] = useState("");
 
   const activeSales = sales.filter((sale) => getSaleStatus(sale.startTime, sale.endTime) === "Active").length;
 
@@ -82,28 +78,6 @@ function App() {
     setNotice(`${name} was added to your sale schedule.`);
   }
 
-  function runDemoSimulation() {
-    setSimulationError("");
-    setSimulationResult(null);
-    const users = Number(userCount);
-    if (!selectedProduct) return setSimulationError("Choose a sale to run the demo.");
-    if (!Number.isInteger(users) || users < 1 || users > 10000) return setSimulationError("Enter a whole number between 1 and 10,000.");
-
-    const product = sales.find((sale) => String(sale.id) === selectedProduct);
-    if (!product) return setSimulationError("That sale could not be found.");
-    const status = getSaleStatus(product.startTime, product.endTime);
-    if (status !== "Active") return setSimulationError(`This sale is ${status.toLowerCase()}. Choose an active sale for the demo.`);
-
-    const successfulOrders = Math.min(users, product.stock);
-    setSimulationResult({
-      totalRequests: users,
-      successfulOrders,
-      failedRequests: users - successfulOrders,
-      initialStock: product.stock,
-      finalStock: product.stock - successfulOrders,
-    });
-  }
-
   return (
     <div className="dashboard">
       <aside className="sidebar">
@@ -114,7 +88,6 @@ function App() {
         <nav className="navigation" aria-label="Main navigation">
           <a className="nav-item active" href="#overview"><span aria-hidden="true">◫</span>Overview</a>
           <a className="nav-item" href="#sales"><span aria-hidden="true">▣</span>Flash sales</a>
-          <a className="nav-item" href="#simulator"><span aria-hidden="true">⌁</span>Simulator <span className="nav-tag">DEMO</span></a>
         </nav>
         <div className="sidebar-bottom"><span className="online-dot" />Local preview<br /><small>Dashboard data is stored in this session</small></div>
       </aside>
@@ -164,17 +137,6 @@ function App() {
           <div className="panel-footer">Showing {sales.length} {sales.length === 1 ? "sale" : "sales"}<span>Updates are saved for this session only</span></div>
         </section>
 
-        <section className="panel simulator-panel" id="simulator">
-          <div className="panel-heading"><div><p className="eyebrow">SANDBOX TOOL</p><h2>Concurrency simulator <span className="demo-pill">DEMO ONLY</span></h2><p className="muted">Explore a simple stock calculation with simulated purchase attempts.</p></div><span className="simulator-mark" aria-hidden="true">⌁</span></div>
-          <div className="demo-callout"><span aria-hidden="true">ⓘ</span><p><strong>Illustrative demo</strong><br />This calculation runs in your browser. It does not send concurrent requests or change sale inventory.</p></div>
-          <div className="simulator-form">
-            <label className="field">Active sale<select value={selectedProduct} onChange={(event) => { setSelectedProduct(event.target.value); setSimulationError(""); setSimulationResult(null); }}><option value="">Choose an active sale</option>{sales.map((sale) => <option key={sale.id} value={String(sale.id)}>{sale.name} · {sale.stock} in stock · {getSaleStatus(sale.startTime, sale.endTime)}</option>)}</select></label>
-            <label className="field">Simulated users<input type="number" min="1" max="10000" step="1" value={userCount} onChange={(event) => { setUserCount(event.target.value); setSimulationError(""); setSimulationResult(null); }} /><small>Choose between 1 and 10,000 users</small></label>
-          </div>
-          <button className="primary-button" type="button" onClick={runDemoSimulation}>Run demo calculation <span aria-hidden="true">→</span></button>
-          {simulationError && <p className="error-message" role="alert">{simulationError}</p>}
-          {simulationResult && <div className="simulation-results" aria-live="polite"><div className="results-heading"><div><h3>Demo results</h3><p className="muted">Estimated from the selected sale's current stock.</p></div><span className="demo-pill">SIMULATED</span></div><div className="result-grid"><div><span>Total attempts</span><strong>{simulationResult.totalRequests.toLocaleString("en-IN")}</strong></div><div><span>Successful orders</span><strong>{simulationResult.successfulOrders.toLocaleString("en-IN")}</strong></div><div><span>Unfilled attempts</span><strong>{simulationResult.failedRequests.toLocaleString("en-IN")}</strong></div><div><span>Estimated remaining stock</span><strong>{simulationResult.finalStock.toLocaleString("en-IN")} <small>of {simulationResult.initialStock}</small></strong></div></div></div>}
-        </section>
         <footer className="page-footer">FlashSale Admin <span>Local preview · Session data only</span></footer>
       </main>
     </div>
